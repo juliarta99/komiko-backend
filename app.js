@@ -1,10 +1,13 @@
-const express = require("express");
+const express = require('express');
+require('dotenv').config();
+
 const app = express();
+const { PORT } = process.env;
 
 app.get('/', (req, res) => {
-    res.send("halo");
+    return res.send("halo");
 })
 
-app.listen(3000, () => {
-    console.info("Running....");
-})
+module.exports = app.listen(PORT, () => {
+    console.info(`running on port ${PORT}`);
+});
