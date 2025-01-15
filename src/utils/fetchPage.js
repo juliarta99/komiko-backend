@@ -23,7 +23,7 @@ const headers = {
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const fetchPage = async (url, config = {}) => {
+module.exports.fetchPage = async (url, config = {}) => {
     try {
         const response = await axios.get(url, {
             headers: {
@@ -45,7 +45,7 @@ export const fetchPage = async (url, config = {}) => {
     }
 };
 
-export const fetchWithRetry = async (url, config, retryConfig) => {
+module.exports.fetchWithRetry = async (url, config, retryConfig) => {
     const { retries = 3, delay = 3000 } = retryConfig || {};
 
     for (let attempt = 1; attempt <= retries; attempt++) {
@@ -61,7 +61,7 @@ export const fetchWithRetry = async (url, config, retryConfig) => {
     }
 };
 
-export const getFinalUrl = async (url, config) => {
+module.exports.getFinalUrl = async (url, config) => {
     try {
         const response = await axios.head(url, {
             headers: {
