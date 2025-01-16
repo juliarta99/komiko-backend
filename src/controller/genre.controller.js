@@ -3,8 +3,8 @@ const { fetchPage } = require('../utils/fetchPage');
 const { responseService } = require('../utils/response');
 
 module.exports.getAll = async (req, res) => {
+    const url = "https://komikstation.co/manga/list-mode/";
     try{
-        const url = "https://komikstation.co/manga/list-mode/";
         const html = await fetchPage(url);
         const $ = load(html);
 
@@ -60,8 +60,6 @@ module.exports.getById = async (req, res) => {
             pagination.push({ pageUrl, pageNumber });
         });
     
-        const nextPage = $(".pagination a.next.page-numbers").attr("href");
-    
         const responseBody = responseService.success(
             "Get Data Genre Successfully!",
             {
@@ -110,14 +108,11 @@ module.exports.getByIdAndPage = async (req, res) => {
             }
         });
 
-        const nextPage = $(".pagination a.next.page-numbers").attr("href");
-
         const responseBody = responseService.success(
             "Get Data Genre Successfully!",
             {
                 allSeries: allSeries,
-                pagination: pagination,
-                nextPage: nextPage
+                pagination: pagination
             }
         )
         res.status(200).json(responseBody);

@@ -30,15 +30,12 @@ module.exports.getBySearch = async (req, res) => {
             const pageNumber = $(element).text();
             pagination.push({ pageUrl, pageNumber });
         });
-    
-        const nextPage = $(".pagination a.next.page-numbers").attr("href");
 
         const responseBody = responseService.success(
             `Get Data Genre by ${search} Successfully!`,
             {
                 allSeries: allSeries,
-                pagination: pagination,
-                nextPage: nextPage
+                pagination: pagination
             }
         )
         res.status(200).json(responseBody);
@@ -58,7 +55,7 @@ module.exports.getBySearchAndPage = async (req, res) => {
         const $ = load(html);
         const allSeries = [];
 
-        $(".bs").each((index, element) => {
+        $(".bs").each((i, element) => {
             const series = {};
             const bsx = $(element).find(".bsx");
         
@@ -72,7 +69,7 @@ module.exports.getBySearchAndPage = async (req, res) => {
         });
     
         const pagination = [];
-        $(".pagination a.page-numbers").each((index, element) => {
+        $(".pagination a.page-numbers").each((i, element) => {
             const pageText = $(element).text().trim().toLowerCase();
         
             if (pageText !== "« sebelumnya" && pageText !== "berikutnya »") {
@@ -82,14 +79,11 @@ module.exports.getBySearchAndPage = async (req, res) => {
             }
         });
 
-        const nextPage = $(".pagination a.next.page-numbers").attr("href");
-
         const responseBody = responseService.success(
             `Get Data Genre by ${search} Successfully!`,
             {
                 allSeries: allSeries,
-                pagination: pagination,
-                nextPage: nextPage
+                pagination: pagination
             }
         )
         res.status(200).json(responseBody);
