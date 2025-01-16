@@ -38,6 +38,8 @@ app.use((err, req, res, next) => {
     })
 })
 
-module.exports = app.listen(PORT, () => {
+app.listen(PORT, () => {
     console.info(`running on port ${PORT}`);
 });
+
+module.exports = app;
