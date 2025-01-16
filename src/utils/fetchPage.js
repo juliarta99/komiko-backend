@@ -21,9 +21,7 @@ const headers = {
     "Upgrade-Insecure-Requests": "1",  
 };
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export const fetchPage = async (url, config = {}) => {
+module.exports.fetchPage = async (url, config = {}) => {
     try {
         const response = await axios.get(url, {
             headers: {
@@ -34,48 +32,10 @@ export const fetchPage = async (url, config = {}) => {
             ...config,
         });
 
-        // console.log("Response Headers:", response.headers);
-
-        await delay(1000);
         return response.data;
     } catch (error) {
         console.error(`Error fetching URL: ${url}`, error.message);
         console.error("Error Response Headers:", error.response?.headers);
-        throw error;
-    }
-};
-
-export const fetchWithRetry = async (url, config, retryConfig) => {
-    const { retries = 3, delay = 3000 } = retryConfig || {};
-
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            return await fetchPage(url, config);
-        } catch (error) {
-            console.error(`Attempt ${attempt} failed: ${url}`, error.message);
-
-            if (attempt === retries) throw error;
-
-            await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-    }
-};
-
-export const getFinalUrl = async (url, config) => {
-    try {
-        const response = await axios.head(url, {
-            headers: {
-                "User-Agent": getRandomUserAgent(),
-                ...headers,
-                ...config.headers,
-            },
-            maxRedirects: 0,
-            validateStatus: (status) => status >= 200 && status < 400,
-        });
-
-        return response.headers.location || url;
-    } catch (error) {
-        console.error(`Error getting final URL: ${url}`, error.message);
         throw error;
     }
 };
