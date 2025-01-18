@@ -1,6 +1,7 @@
 const { load } = require("cheerio");
 const { fetchPage } = require('../utils/fetchPage');
 const { responseService } = require('../utils/response');
+const { getSlugInLastUrl } = require("../utils/getSlugInLastUrl");
 
 module.exports.getBySearch = async (req, res) => {
     const { search } = req.params;

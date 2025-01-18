@@ -1,6 +1,7 @@
 const { load } = require("cheerio");
 const { fetchPage } = require('../utils/fetchPage');
 const { responseService } = require('../utils/response');
+const { getSlugInLastUrl } = require("../utils/getSlugInLastUrl");
 
 module.exports.getAll = async (req, res) => {
     const url = "https://komikstation.co/manga/list-mode/";
