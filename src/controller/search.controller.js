@@ -17,10 +17,11 @@ module.exports.getBySearch = async (req, res) => {
             const bsx = $(element).find(".bsx");
         
             series.title = bsx.find("a").attr("title");
-            series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
-            series.image = bsx.find("img").attr("src");
-            series.latestChapter = bsx.find(".epxs").text();
+            series.category = bsx.find("span.type").text().trim();
+            series.chapter = bsx.find(".epxs").text();
+            series.imageSrc = bsx.find("img").attr("src");
             series.rating = bsx.find(".numscore").text();
+            series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
         
             results.push(series);
         });
@@ -63,10 +64,11 @@ module.exports.getBySearchAndPage = async (req, res) => {
             const bsx = $(element).find(".bsx");
         
             series.title = bsx.find("a").attr("title");
-            series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
-            series.image = bsx.find("img").attr("src");
-            series.latestChapter = bsx.find(".epxs").text();
+            series.category = bsx.find("span.type").text().trim();
+            series.chapter = bsx.find(".epxs").text();
+            series.imageSrc = bsx.find("img").attr("src");
             series.rating = bsx.find(".numscore").text();
+            series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
         
             results.push(series);
         });
