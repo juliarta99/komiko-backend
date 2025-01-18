@@ -39,7 +39,7 @@ module.exports.getById = async (req, res) => {
     try {
         const html = await fetchPage(url);
         const $ = load(html);
-        const allSeries = [];
+        const results = [];
     
         $(".bs").each((i, element) => {
             const series = {};
@@ -51,20 +51,22 @@ module.exports.getById = async (req, res) => {
             series.latestChapter = bsx.find(".epxs").text();
             series.rating = bsx.find(".numscore").text();
         
-            allSeries.push(series);
+            results.push(series);
         });
     
         const pagination = [];
         $(".pagination a.page-numbers").each((i, element) => {
             const pageUrl = getSlugInLastUrl($(element).attr("href"));
             const pageNumber = $(element).text();
-            pagination.push({ pageUrl, pageNumber });
+            if(pageNumber != "Berikutnya »") {
+                pagination.push({ pageUrl, pageNumber });
+            }
         });
     
         const responseBody = responseService.success(
             "Get Data Genre Successfully!",
             {
-                allSeries: allSeries,
+                results: results,
                 pagination: pagination
             }
         )
@@ -83,7 +85,7 @@ module.exports.getByIdAndPage = async (req, res) => {
     try{
         const html = await fetchPage(url);
         const $ = load(html);
-        const allSeries = [];
+        const results = [];
 
         $(".bs").each((i, element) => {
             const series = {};
@@ -95,7 +97,7 @@ module.exports.getByIdAndPage = async (req, res) => {
             series.latestChapter = bsx.find(".epxs").text();
             series.rating = bsx.find(".numscore").text();
         
-            allSeries.push(series);
+            results.push(series);
         });
     
         const pagination = [];
@@ -105,14 +107,16 @@ module.exports.getByIdAndPage = async (req, res) => {
             if (pageText !== "« sebelumnya" && pageText !== "berikutnya »") {
                 const pageUrl = getSlugInLastUrl($(element).attr("href"));
                 const pageNumber = $(element).text();
-                pagination.push({ pageUrl, pageNumber });
+                if(pageNumber != "Berikutnya »") {
+                    pagination.push({ pageUrl, pageNumber });
+                }
             }
         });
 
         const responseBody = responseService.success(
             "Get Data Genre Successfully!",
             {
-                allSeries: allSeries,
+                results: results,
                 pagination: pagination
             }
         )
