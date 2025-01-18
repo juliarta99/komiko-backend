@@ -1,6 +1,7 @@
 const { load } = require("cheerio");
 const { fetchPage } = require('../utils/fetchPage');
 const { responseService } = require('../utils/response');
+const { getSlugInLastUrl } = require("../utils/getSlugInLastUrl");
 
 module.exports.getComics = async (req, res) => {
     const baseUrl = `https://komikstation.co/manga`;
@@ -18,15 +19,15 @@ module.exports.getComics = async (req, res) => {
             const chapter = $(element).find(".epxs").text().trim();
             const rating = $(element).find(".numscore").text().trim();
             const imageSrc = $(element).find("img").attr("src");
-            const link = $(element).find("a").attr("href");
-            
+            const slug = getSlugInLastUrl($(element).find("a").attr("href"));
+
             results.push({
                 title,
                 category,
                 chapter,
                 rating,
                 imageSrc,
-                link,
+                slug,
             });
         });
 
@@ -37,8 +38,8 @@ module.exports.getComics = async (req, res) => {
             `Get Data Comics Successfully!`,
             {
                 results: results,
-                prevPage: prevPage ? `https://komikstation.co/manga${prevPage}` : null,
-                nextPage: nextPage ? `https://komikstation.co/manga${nextPage}` : null
+                prevPage: prevPage ? prevPage : null,
+                nextPage: nextPage ? nextPage : null
             }
         )
         res.status(200).json(responseBody);
@@ -64,19 +65,19 @@ module.exports.getComicDetails = async (req, res) => {
 
         const synopsis = $(".entry-content.entry-content-single").text().trim();
 
-        const firstChapterLink = $(".lastend .inepcx")
+        const firstChapterSlug = getSlugInLastUrl($(".lastend .inepcx")
                                 .first()
                                 .find("a")
-                                .attr("href");
+                                .attr("href"));
         const firstChapterTitle = $(".lastend .inepcx")
                                 .first()
                                 .find(".epcurfirst")
                                 .text()
                                 .trim();
-        const latestChapterLink = $(".lastend .inepcx")
+        const latestChapterSlug = getSlugInLastUrl($(".lastend .inepcx")
                                 .last()
                                 .find("a")
-                                .attr("href");
+                                .attr("href"));
         const latestChapterTitle = $(".lastend .inepcx")
                                 .last()
                                 .find(".epcurlast")
@@ -93,23 +94,23 @@ module.exports.getComicDetails = async (req, res) => {
         const genres = [];
         $(".mgen a").each((i, element) => {
             const genreName = $(element).text().trim();
-            const genreLink = $(element).attr("href");
+            const genreSlug = getSlugInLastUrl($(element).attr("href"));
             genres.push({
                 genreName,
-                genreLink,
+                genreSlug,
             });
         });
 
         const chapters = [];
         $("#chapterlist li").each((i, element) => {
             const chapterNum = $(element).find(".chapternum").text().trim();
-            const chapterLink = $(element).find(".eph-num a").attr("href");
+            const chapterSlug = getSlugInLastUrl($(element).find(".eph-num a").attr("href"));
             const chapterDate = $(element).find(".chapterdate").text().trim();
             const downloadLink = $(element).find(".dload").attr("href");
 
             chapters.push({
                 chapterNum,
-                chapterLink,
+                chapterSlug,
                 chapterDate,
                 downloadLink,
             });
@@ -123,11 +124,11 @@ module.exports.getComicDetails = async (req, res) => {
             synopsis,
             firstChapter: {
                 title: firstChapterTitle,
-                link: firstChapterLink,
+                slug: firstChapterSlug,
             },
             latestChapter: {
                 title: latestChapterTitle,
-                link: latestChapterLink,
+                slug: latestChapterSlug,
             },
             status,
             type,
@@ -181,13 +182,13 @@ module.exports.getChapterById = async (req, res) => {
         const jsonObject = JSON.parse(jsonString);
         const images = jsonObject.sources[0]?.images || [];
 
-        const prevChapter = jsonObject.prevUrl || null;
-        const nextChapter = jsonObject.nextUrl || null;
+        const prevChapter = getSlugInLastUrl(jsonObject.prevUrl) || null;
+        const nextChapter = getSlugInLastUrl(jsonObject.nextUrl) || null;
 
         const chapters = [];
         $(".nvx #chapter option").each((i, element) => {
             const chapterTitle = $(element).text().trim();
-            const chapterUrl = $(element).attr("value") || null;
+            const chapterUrl = getSlugInLastUrl($(element).attr("value")) || null;
 
             chapters.push({
                 title: chapterTitle,

@@ -16,7 +16,7 @@ module.exports.getBySearch = async (req, res) => {
             const bsx = $(element).find(".bsx");
         
             series.title = bsx.find("a").attr("title");
-            series.url = bsx.find("a").attr("href");
+            series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
             series.image = bsx.find("img").attr("src");
             series.latestChapter = bsx.find(".epxs").text();
             series.rating = bsx.find(".numscore").text();
@@ -26,7 +26,7 @@ module.exports.getBySearch = async (req, res) => {
     
         const pagination = [];
             $(".pagination a.page-numbers").each((i, element) => {
-            const pageUrl = $(element).attr("href");
+            const pageUrl = getSlugInLastUrl($(element).attr("href"));
             const pageNumber = $(element).text();
             pagination.push({ pageUrl, pageNumber });
         });
@@ -60,7 +60,7 @@ module.exports.getBySearchAndPage = async (req, res) => {
             const bsx = $(element).find(".bsx");
         
             series.title = bsx.find("a").attr("title");
-            series.url = bsx.find("a").attr("href");
+            series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
             series.image = bsx.find("img").attr("src");
             series.latestChapter = bsx.find(".epxs").text();
             series.rating = bsx.find(".numscore").text();
@@ -73,7 +73,7 @@ module.exports.getBySearchAndPage = async (req, res) => {
             const pageText = $(element).text().trim().toLowerCase();
         
             if (pageText !== "« sebelumnya" && pageText !== "berikutnya »") {
-                const pageUrl = $(element).attr("href");
+                const pageUrl = getSlugInLastUrl($(element).attr("href"));
                 const pageNumber = $(element).text();
                 pagination.push({ pageUrl, pageNumber });
             }
