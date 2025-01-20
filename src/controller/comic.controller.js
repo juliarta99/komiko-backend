@@ -11,9 +11,7 @@ module.exports.getComics = async (req, res) => {
     try{
         const html = await fetchPage(url);
         const $ = load(html);
-        const results = [];
-
-        $(".bs").each((i, element) => {
+        const results = $(".bs").map((i, element) => {
             const title = $(element).find(".tt").text().trim();
             const category = $(element).find("span.type").text().trim();
             const chapter = $(element).find(".epxs").text().trim();
@@ -21,15 +19,15 @@ module.exports.getComics = async (req, res) => {
             const imageSrc = $(element).find("img").attr("src");
             const slug = getSlugInLastUrl($(element).find("a").attr("href"));
 
-            results.push({
+            return {
                 title,
                 category,
                 chapter,
                 rating,
                 imageSrc,
                 slug,
-            });
-        });
+            };
+        }).get();
 
         const prevPage = $(".hpage a.l").attr("href");
         const nextPage = $(".hpage a.r").attr("href");
@@ -65,15 +63,44 @@ module.exports.getComicDetails = async (req, res) => {
 
         const synopsis = $(".entry-content.entry-content-single").text().trim();
 
-        const firstChapterSlug = getSlugInLastUrl($(".lastend .inepcx")
-                                .first()
-                                .find("a")
-                                .attr("href"));
-        const firstChapterTitle = $(".lastend .inepcx")
-                                .first()
-                                .find(".epcurfirst")
-                                .text()
-                                .trim();
+        const status = $(".tsinfo .imptdt").eq(0).find("i").text().trim();
+        const type = $(".tsinfo .imptdt").eq(1).find("a").text().trim();
+        const released = $(".fmed").eq(0).find("span").text().trim();
+        const author = $(".fmed").eq(1).find("span").text().trim();
+        const artist = $(".fmed").eq(2).find("span").text().trim();
+        const updatedOn = $(".fmed").eq(4).find("span time").text().trim();
+
+        const genres = $(".mgen a").map((i, element) => {
+            const genreName = $(element).text().trim();
+            const genreSlug = getSlugInLastUrl($(element).attr("href"));
+            return {
+                genreName,
+                genreSlug,
+            };
+        }).get();
+
+        let firstChapterSlug, firstChapterTitle;
+        const chapterElements = $("#chapterlist li");
+        const lastIndex = chapterElements.length - 1;
+        const chapters = $("#chapterlist li").map((i, element) => {
+            const chapterNum = $(element).find(".chapternum").text().trim();
+            const chapterSlug = getSlugInLastUrl($(element).find(".eph-num a").attr("href"));
+            const chapterDate = $(element).find(".chapterdate").text().trim();
+            const downloadLink = $(element).find(".dload").attr("href");
+        
+            if (i === lastIndex) {
+                firstChapterSlug = chapterSlug;
+                firstChapterTitle = chapterNum;
+            }
+        
+            return {
+                chapterNum,
+                chapterSlug,
+                chapterDate,
+                downloadLink,
+            };
+        }).get();
+
         const latestChapterSlug = getSlugInLastUrl($(".lastend .inepcx")
                                 .last()
                                 .find("a")
@@ -83,38 +110,6 @@ module.exports.getComicDetails = async (req, res) => {
                                 .find(".epcurlast")
                                 .text()
                                 .trim();
-
-        const status = $(".tsinfo .imptdt").eq(0).find("i").text().trim();
-        const type = $(".tsinfo .imptdt").eq(1).find("a").text().trim();
-        const released = $(".fmed").eq(0).find("span").text().trim();
-        const author = $(".fmed").eq(1).find("span").text().trim();
-        const artist = $(".fmed").eq(2).find("span").text().trim();
-        const updatedOn = $(".fmed").eq(3).find("time").text().trim();
-
-        const genres = [];
-        $(".mgen a").each((i, element) => {
-            const genreName = $(element).text().trim();
-            const genreSlug = getSlugInLastUrl($(element).attr("href"));
-            genres.push({
-                genreName,
-                genreSlug,
-            });
-        });
-
-        const chapters = [];
-        $("#chapterlist li").each((i, element) => {
-            const chapterNum = $(element).find(".chapternum").text().trim();
-            const chapterSlug = getSlugInLastUrl($(element).find(".eph-num a").attr("href"));
-            const chapterDate = $(element).find(".chapterdate").text().trim();
-            const downloadLink = $(element).find(".dload").attr("href");
-
-            chapters.push({
-                chapterNum,
-                chapterSlug,
-                chapterDate,
-                downloadLink,
-            });
-        });
 
         const details = {
             title,
@@ -185,16 +180,36 @@ module.exports.getChapterById = async (req, res) => {
         const prevChapter = getSlugInLastUrl(jsonObject.prevUrl) || null;
         const nextChapter = getSlugInLastUrl(jsonObject.nextUrl) || null;
 
-        const chapters = [];
-        $(".nvx #chapter option").each((i, element) => {
-            const chapterTitle = $(element).text().trim();
-            const chapterUrl = getSlugInLastUrl($(element).attr("value")) || null;
+        // const chapters = $(".nvx #chapter option").map((i, element) => {
+        //     const chapterTitle = $(element).text().trim();
+        //     const chapterUrl = getSlugInLastUrl($(element).attr("value")) || null;
 
-            chapters.push({
-                title: chapterTitle,
-                url: chapterUrl,
-            });
-        });
+        //     return {
+        //         title: chapterTitle,
+        //         url: chapterUrl,
+        //     };
+        // }).get();
+        const comicUrl = $(".headpost .allc").find("a").attr("href");
+        const html2 = await fetchPage(comicUrl);
+        const $$ = load(html2);
+
+        let firstChapterSlug, firstChapterTitle;
+        const chapterElements = $$("#chapterlist li");
+        const lastIndex = chapterElements.length - 1;
+        const chapters = $$("#chapterlist li").map((i, element) => {
+            const chapterNum = $$(element).find(".chapternum").text().trim();
+            const chapterSlug = getSlugInLastUrl($$(element).find(".eph-num a").attr("href"));
+        
+            if (i === lastIndex) {
+                firstChapterSlug = chapterSlug;
+                firstChapterTitle = chapterNum;
+            }
+        
+            return {
+                title: chapterNum,
+                url: chapterSlug,
+            };
+        }).get();
 
         const responseBody = responseService.success(
             `Get Data Chapter ${title} Successfully!`,

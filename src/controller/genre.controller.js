@@ -9,16 +9,17 @@ module.exports.getAll = async (req, res) => {
         const html = await fetchPage(url);
         const $ = load(html);
 
-        const genres = [];
-
-        $(".dropdown-menu.c4.genrez li").each((i, element) => {
+        const genres = $(".dropdown-menu.c4.genrez li").map((i, element) => {
             const genreLabel = $(element).find("label").text().trim();
             const genreValue = $(element).find("input").val();
 
             if (genreLabel && genreValue) {
-                genres.push({ label: genreLabel, value: genreValue });
+                return { 
+                    label: genreLabel, 
+                    value: genreValue 
+                };
             }
-        });
+        }).get();
 
         responseBody = responseService.success(
             "Get Data All Genre Successfully!",
@@ -39,9 +40,7 @@ module.exports.getById = async (req, res) => {
     try {
         const html = await fetchPage(url);
         const $ = load(html);
-        const results = [];
-    
-        $(".bs").each((i, element) => {
+        const results = $(".bs").map((i, element) => {
             const series = {};
             const bsx = $(element).find(".bsx");
         
@@ -52,17 +51,20 @@ module.exports.getById = async (req, res) => {
             series.rating = bsx.find(".numscore").text();
             series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
         
-            results.push(series);
-        });
+            return series;
+        }).get();
     
-        const pagination = [];
-        $(".pagination a.page-numbers").each((i, element) => {
+        const pagination = $(".pagination a.page-numbers").map((i, element) => {
             const pageUrl = getSlugInLastUrl($(element).attr("href"));
             const pageNumber = $(element).text();
+            
             if(pageNumber != "Berikutnya »") {
-                pagination.push({ pageUrl, pageNumber });
+                return{ 
+                    pageUrl, 
+                    pageNumber 
+                };
             }
-        });
+        }).get();
     
         const responseBody = responseService.success(
             "Get Data Genre Successfully!",
@@ -86,9 +88,7 @@ module.exports.getByIdAndPage = async (req, res) => {
     try{
         const html = await fetchPage(url);
         const $ = load(html);
-        const results = [];
-
-        $(".bs").each((i, element) => {
+        const results = $(".bs").map((i, element) => {
             const series = {};
             const bsx = $(element).find(".bsx");
         
@@ -99,21 +99,28 @@ module.exports.getByIdAndPage = async (req, res) => {
             series.rating = bsx.find(".numscore").text();
             series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
         
-            results.push(series);
-        });
+            return series;
+        }).get();
     
-        const pagination = [];
-        $(".pagination a.page-numbers").each((i, element) => {
+        const pagination = $(".pagination a.page-numbers").map((i, element) => {
             const pageText = $(element).text().trim().toLowerCase();
         
             if (pageText !== "« sebelumnya" && pageText !== "berikutnya »") {
-                const pageUrl = getSlugInLastUrl($(element).attr("href"));
+                let pageUrl;
                 const pageNumber = $(element).text();
+                if(pageNumber == "1") {
+                    pageUrl = "1";
+                } else {
+                    pageUrl = getSlugInLastUrl($(element).attr("href"));
+                }
                 if(pageNumber != "Berikutnya »") {
-                    pagination.push({ pageUrl, pageNumber });
+                    return { 
+                        pageUrl,
+                        pageNumber 
+                    };
                 }
             }
-        });
+        }).get();
 
         const responseBody = responseService.success(
             "Get Data Genre Successfully!",

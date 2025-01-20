@@ -10,9 +10,7 @@ module.exports.getBySearch = async (req, res) => {
     try{
         const html =  await fetchPage(url);
         const $ = load(html);
-        const results = [];
-
-        $(".bs").each((i, element) => {
+        const results = $(".bs").map((i, element) => {
             const series = {};
             const bsx = $(element).find(".bsx");
         
@@ -23,17 +21,19 @@ module.exports.getBySearch = async (req, res) => {
             series.rating = bsx.find(".numscore").text();
             series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
         
-            results.push(series);
-        });
+            return series;
+        }).get();
     
-        const pagination = [];
-            $(".pagination a.page-numbers").each((i, element) => {
+        const pagination = $(".pagination a.page-numbers").map((i, element) => {
             const pageUrl = getSlugInLastUrl($(element).attr("href"));
             const pageNumber = $(element).text();
             if(pageNumber != "Berikutnya »") {
-                pagination.push({ pageUrl, pageNumber });
+                return{ 
+                    pageUrl,
+                    pageNumber 
+                };
             }
-        });
+        }).get();
 
         const responseBody = responseService.success(
             `Get Data Genre by ${search} Successfully!`,
@@ -57,9 +57,7 @@ module.exports.getBySearchAndPage = async (req, res) => {
     try{
         const html =  await fetchPage(url);
         const $ = load(html);
-        const results = [];
-
-        $(".bs").each((i, element) => {
+        const results = $(".bs").map((i, element) => {
             const series = {};
             const bsx = $(element).find(".bsx");
         
@@ -70,21 +68,28 @@ module.exports.getBySearchAndPage = async (req, res) => {
             series.rating = bsx.find(".numscore").text();
             series.slug = getSlugInLastUrl(bsx.find("a").attr("href"));
         
-            results.push(series);
-        });
+            return series;
+        }).get();
     
-        const pagination = [];
-        $(".pagination a.page-numbers").each((i, element) => {
+        const pagination = $(".pagination a.page-numbers").map((i, element) => {
             const pageText = $(element).text().trim().toLowerCase();
         
             if (pageText !== "« sebelumnya" && pageText !== "berikutnya »") {
-                const pageUrl = getSlugInLastUrl($(element).attr("href"));
+                let pageUrl;
                 const pageNumber = $(element).text();
+                if(pageNumber == "1") {
+                    pageUrl = `?s=${search}`;
+                } else {
+                    pageUrl = getSlugInLastUrl($(element).attr("href"));
+                }
                 if(pageNumber != "Berikutnya »") {
-                    pagination.push({ pageUrl, pageNumber });
+                    return{ 
+                        pageUrl,
+                        pageNumber 
+                    };
                 }
             }
-        });
+        }).get();
 
         const responseBody = responseService.success(
             `Get Data Genre by ${search} Successfully!`,
